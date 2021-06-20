@@ -5,13 +5,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init()  {
+func init() {
 	rootCmd.AddCommand(serveCmd)
 }
 
 var serveCmd = &cobra.Command{
-	Use: "serve",
-	Long: "Serve the url-lite server",
+	Use:   "serve",
+	Long:  "Serve the url-lite server",
 	Short: "Server the url-lite server",
 	Run: func(cmd *cobra.Command, args []string) {
 		apis.Serve()
