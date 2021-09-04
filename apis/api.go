@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
 	"github.com/pkbhowmick/url-lite/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -80,12 +81,17 @@ func getAPIDevKey(w http.ResponseWriter, r *http.Request) {
 
 func Serve() {
 	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})
 	r.Post("/get-api-key", getAPIDevKey)
 
-	log.Println("server is listening on port 3000")
-
-	http.ListenAndServe(":3000", r)
+	s := http.Server{
+		Addr:              ":3000",
+		Handler:           r,
+	}
+	log.Printf("API server is running at %v",s.Addr)
+	log.Fatalln(s.ListenAndServe())
 }

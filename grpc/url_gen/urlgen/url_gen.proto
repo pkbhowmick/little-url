@@ -1,0 +1,13 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option go_package = "github.com/pkbhowmick/url-lite/grpc/url_gen/urlgen";
+
+package urlgen;
+
+service KeyGen {
+  rpc GenerateKey(google.protobuf.Empty) returns (Key) {}
+}
+
+message Key {
+  string key = 1;
+}
