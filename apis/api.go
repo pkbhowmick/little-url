@@ -3,6 +3,9 @@ package apis
 import (
 	"context"
 	"encoding/json"
+	"github.com/golang/protobuf/ptypes/empty"
+	pb "github.com/pkbhowmick/url-lite/grpc/url_gen/urlgen"
+	"google.golang.org/grpc"
 	"log"
 	"net/http"
 	"time"
@@ -20,6 +23,7 @@ const (
 	MongoDbUrl     = "mongodb://localhost:27017"
 	Database       = "url-lite"
 	UserCollection = "user"
+	gRPCServerAddr = "localhost:50001"
 )
 
 func getNewDevKey() string {
@@ -79,6 +83,24 @@ func getAPIDevKey(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GenKey() (string, error) {
+	conn, err := grpc.Dial(gRPCServerAddr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
+	c := pb.NewKeyGenClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	rep, err := c.GenerateKey(ctx, &empty.Empty{})
+	if err != nil {
+		return "", err
+	}
+	return rep.Key, nil
+}
+
 func Serve() {
 	r := chi.NewRouter()
 
@@ -86,7 +108,7 @@ func Serve() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})
-	r.Post("/get-api-key", getAPIDevKey)
+	r.Post("/api/get-api-key", getAPIDevKey)
 
 	s := http.Server{
 		Addr:              ":3000",
